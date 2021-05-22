@@ -30,6 +30,8 @@ import javafx.stage.FileChooser;
 
 public class TreinamentoController implements Initializable {
 
+    CSVReader csvr;
+    
     @FXML
     private ToggleGroup gay;
     @FXML
@@ -66,7 +68,7 @@ public class TreinamentoController implements Initializable {
         
         fc.setTitle("Abrir Arquivo CSV");
         Reader reader = Files.newBufferedReader(Paths.get(fc.showOpenDialog(null).toURI()));
-        CSVReader csvr = new CSVReader(reader);
+        csvr = new CSVReader(reader);
 
         List<String> colstrings = Arrays.asList(csvr.readNext());
         for (int j = 0; j < colstrings.size(); j++) 
@@ -99,6 +101,16 @@ public class TreinamentoController implements Initializable {
     @FXML
     private void clkTreinar(ActionEvent event) 
     {
+        int aux = Integer.parseInt(txaprendizagem.getText());
+        if(aux<0||aux>1)
+        {
+            //ATENCAO ATENCAO, O CARRO DO OVO ESTÁ PASSANDO NA SUA RUA
+            System.out.println("coloca erro que ta invalido aqui Mateus por favor");
+        }
+        if(csvr == null)
+        {
+            System.out.println("coloca aqui tbm que não foi colocado o arquivo de treinamento");
+        }
         
     }
 }
