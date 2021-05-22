@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.shape.Line?>
 
-<AnchorPane prefHeight="446.0" prefWidth="600.0" styleClass="default" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="trabredesneurais.TreinamentoController">
+<AnchorPane prefHeight="446.0" prefWidth="600.0" styleClass="default" stylesheets="@../CSS/Dark.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="trabredesneurais.TreinamentoController">
    <children>
       <JFXTextField fx:id="txentrada" disable="true" layoutX="31.0" layoutY="38.0" promptText="Camadas de entrada" />
       <JFXTextField fx:id="txsaida" disable="true" layoutX="31.0" layoutY="129.0" promptText="Camadas de Saída" />
@@ -27,6 +27,6 @@
       <JFXTextField fx:id="txaprendizagem" layoutX="431.0" layoutY="129.0" text="Taxa de aprendizagem" />
       <Line endX="-258.0" endY="108.0" layoutX="292.0" layoutY="81.0" startX="275.0" startY="108.0" />
       <JFXButton buttonType="RAISED" layoutX="34.0" layoutY="407.0" onAction="#clkTreinar" prefHeight="25.0" prefWidth="534.0" text="Treinar" />
-      <TableView layoutX="34.0" layoutY="199.0" prefHeight="195.0" prefWidth="534.0" />
+      <TableView fx:id="tvcsv" layoutX="34.0" layoutY="199.0" prefHeight="195.0" prefWidth="534.0" />
    </children>
 </AnchorPane>
