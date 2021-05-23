@@ -1,14 +1,11 @@
 package trabredesneurais;
 
+import Models.Treino;
 import com.jfoenix.controls.JFXRadioButton;
 import com.jfoenix.controls.JFXTextField;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
@@ -25,12 +22,14 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 
 public class TreinamentoController implements Initializable {
 
-    CSVReader csvr;
+    private CSVReader csvr;
+    private List<Treino> t;
+    double[] maior;
+    double[] menor;
     
     @FXML
     private ToggleGroup gay;
@@ -85,17 +84,60 @@ public class TreinamentoController implements Initializable {
         List<String> classes = new ArrayList<>();
         String[] line;
         List<String> lc;
+        maior = new double[colstrings.size()-2];
+        menor = new double[colstrings.size()-2];
+        
+        for (int i = 0; i < maior.length; i++) 
+        {
+            maior[i] = Double.MIN_VALUE;
+            menor[i] = Double.MAX_VALUE;
+        }
+        
+        List<List<String>> l = new ArrayList<>();
+        
         while((line = csvr.readNext()) != null)
         {
             lc = Arrays.asList(line);
+            for (int i = 0; i < maior.length; i++)
+            {
+                if(Integer.parseInt(line[i]) > maior[i])
+                    maior[i] = Double.parseDouble(line[i]);
+                if(Integer.parseInt(line[i]) < menor[i])
+                    menor[i] = Double.parseDouble(line[i]);
+            }
+            
             if(!classes.contains(lc.get(lc.size()-1)))
                 classes.add(lc.get(lc.size()-1));
             tvcsv.getItems().add(lc);
+            l.add(lc);
         }  
+        
+        geraCamadaEntrada(l);
         
         int saida = classes.size();
         txsaida.setText(""+saida);
         txoculta.setText(""+((entrada+saida)/2));
+    }
+    
+    private void geraCamadaEntrada(List<List<String>> l)
+    {
+        Treino tr;
+        double[] diferenca = new double[maior.length];
+        t = new ArrayList<>();
+        for (int i = 0; i < maior.length; i++) 
+        {
+            diferenca[i] = maior[i]-menor[i];
+        }
+        for (int j = 0; j < l.size(); j++) 
+        {
+            tr = new Treino();
+            for (int k = 0; k < maior.length; k++) 
+            {
+                tr.getEntradas().add((Double.parseDouble(l.get(j).get(k))-menor[k])/diferenca[k]);
+            }
+            t.add(tr);
+        }
+        System.out.println("");
     }
 
     @FXML
