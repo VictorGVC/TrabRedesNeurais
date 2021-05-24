@@ -1,7 +1,8 @@
 package trabredesneurais;
 
-import models.Neuronio;
-import models.Treino;
+import Models.Neuronio;
+import Models.Treino;
+import util.MaskFieldUtil;
 import com.jfoenix.controls.JFXRadioButton;
 import com.jfoenix.controls.JFXTextField;
 import com.opencsv.CSVReader;
@@ -62,7 +63,12 @@ public class TreinamentoController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) 
     {
-        
+        MaskFieldUtil.numericField(txentrada);
+        MaskFieldUtil.numericField(txoculta);
+        MaskFieldUtil.numericField(txsaida);
+        MaskFieldUtil.numericField(txiteracoes);
+        MaskFieldUtil.numericField(txerro);
+        MaskFieldUtil.numericField(txaprendizagem);
     }    
 
     @FXML
@@ -143,84 +149,110 @@ public class TreinamentoController implements Initializable {
     @FXML
     private void clkTreinar(ActionEvent event) 
     {
-        int oculta = Integer.parseInt(txoculta.getText());
-        int entrada = Integer.parseInt(txentrada.getText());
-        int saida = Integer.parseInt(txsaida.getText());
-        int aux = Integer.parseInt(txaprendizagem.getText());
         boolean flag = true;
         Alert a = new Alert(Alert.AlertType.INFORMATION);
         
-        if(aux < 0 || aux > 1)
-        {
-            //ATENCAO ATENCAO, O CARRO DO OVO ESTÁ PASSANDO NA SUA RUA
-            //OLHA O CARRO DO DANONE EINNNNNN
-            a.setTitle("Treinar");
-            a.setHeaderText("Atenção!");
-            a.setContentText("Taxa Inválida! Insira um Valor Entre 0 e 1");
+        a.setTitle("Treinar");
+        a.setHeaderText("Atenção!");
+        
+        if(txoculta.getText().equals("")) {
+            
+            a.setContentText("Quantidade de Camadas Ocultas é Necessaria");
             a.showAndWait();
             flag = false;
         }
-        if(csvr == null)
-        {
-            a.setTitle("Treinar");
-            a.setHeaderText("Atenção!");
+        if(txentrada.getText().equals("")) {
+            
+            a.setContentText("Quantidade de Camadas de Entrada é Necessaria");
+            a.showAndWait();
+            flag = false;
+        }
+        if(txsaida.getText().equals("")) {
+            
+            a.setContentText("Quantidade de Camadas de Saída é Necessaria");
+            a.showAndWait();
+            flag = false;
+        }
+        if(txaprendizagem.getText().equals("")) {
+            
+            a.setContentText("Taxa de Aprendizagem é Necessaria");
+            a.showAndWait();
+            flag = false;
+        }
+        if(csvr == null) {
+            
             a.setContentText("Arquivo Não Aberto");
             a.showAndWait();
             try { clkArq(null); } catch(Exception e) {}
             flag = false;
         }
-        if(flag)
-        {
-            //todos os campos ok.
-            //boa gay
-            geraMatrizDesejada();
-            double erroatual = Double.MAX_VALUE;
-            double[][] moculta = new double[oculta][entrada];
-            double[][] msaida = new double[saida][oculta];
-            
-            for (Treino treino : t) 
+        if(flag) {
+        
+            int oculta = Integer.parseInt(txoculta.getText());
+            int entrada = Integer.parseInt(txentrada.getText());
+            int saida = Integer.parseInt(txsaida.getText());
+            int aux = Integer.parseInt(txaprendizagem.getText());
+
+            flag = true;
+            if(aux < 0 || aux > 1)
             {
-                treino.getOculta().setCamada(entrada, oculta, saida);
-                for (int i = 0; i < saida; i++) 
-                    treino.getSaidas().add(new Neuronio());
-                treino.getOculta().rPeso(entrada, saida);
+                //ATENCAO ATENCAO, O CARRO DO OVO ESTÁ PASSANDO NA SUA RUA
+                //OLHA O CARRO DO DANONE EINNNNNN
+                a.setContentText("Taxa Inválida! Insira um Valor Entre 0 e 1");
+                a.showAndWait();
+                flag = false;
             }
-            
-            for (int i = 0; i < saida; i++)
+            if(flag)
             {
-                focutapeso.add(moculta);
-                fsaidapeso.add(msaida);
-            }
-            
-            int it = Integer.parseInt(txiteracoes.getText());
-            double ermin = Double.parseDouble(txerro.getText());
-            int saidad = 0;
-            
-            for (int i = 0; i < it && erroatual > ermin; i++) 
-            {
-                for (int k = 0; k < t.size(); k++) 
+                geraMatrizDesejada();
+                double erroatual = Double.MAX_VALUE;
+                double[][] moculta = new double[oculta][entrada];
+                double[][] msaida = new double[saida][oculta];
+
+                for (Treino treino : t) 
                 {
-                    for (int j = 0; j < classes.size(); j++) 
-                        if(classes.get(j).equals(tvcsv.getItems().get(i).get(entrada)))
-                        {
-                            j = classes.size();
-                            saidad = j;
-                        }
-                
-                    focutapeso.set(saidad,t.get(k).getOculta().getOcultapeso());
-                    fsaidapeso.set(saidad,t.get(k).getOculta().getSaidapeso());
-                    
-                    for (int j = 0; j < oculta; j++) 
+                    treino.getOculta().setCamada(entrada, oculta, saida);
+                    for (int i = 0; i < saida; i++) 
+                        treino.getSaidas().add(new Neuronio());
+                    treino.getOculta().rPeso(entrada, saida);
+                }
+
+                for (int i = 0; i < saida; i++)
+                {
+                    focutapeso.add(moculta);
+                    fsaidapeso.add(msaida);
+                }
+
+                int it = Integer.parseInt(txiteracoes.getText());
+                double ermin = Double.parseDouble(txerro.getText());
+                int saidad = 0;
+
+                for (int i = 0; i < it && erroatual > ermin; i++) 
+                {
+                    for (int k = 0; k < t.size(); k++) 
                     {
-                        t.get(i).getOculta().getNeuronio().get(j).calculaNet(j,t.get(i).getEntradas(),t.get(i).getOculta().getOcultapeso());
-                        if(rblin.isSelected())
-                            t.get(i).getOculta().getNeuronio().get(j).setLinear();
-                        else if(rblog.isSelected())
-                            t.get(i).getOculta().getNeuronio().get(j).SetLogistica();
-                        else
-                            t.get(i).getOculta().getNeuronio().get(j).setHiperbolica();
-                    }
-                }  
+                        for (int j = 0; j < classes.size(); j++) 
+                            if(classes.get(j).equals(tvcsv.getItems().get(i).get(entrada)))
+                            {
+                                j = classes.size();
+                                saidad = j;
+                            }
+
+                        focutapeso.set(saidad,t.get(k).getOculta().getOcultapeso());
+                        fsaidapeso.set(saidad,t.get(k).getOculta().getSaidapeso());
+
+                        for (int j = 0; j < oculta; j++) 
+                        {
+                            t.get(i).getOculta().getNeuronio().get(j).calculaNet(j,t.get(i).getEntradas(),t.get(i).getOculta().getOcultapeso());
+                            if(rblin.isSelected())
+                                t.get(i).getOculta().getNeuronio().get(j).setLinear();
+                            else if(rblog.isSelected())
+                                t.get(i).getOculta().getNeuronio().get(j).SetLogistica();
+                            else
+                                t.get(i).getOculta().getNeuronio().get(j).setHiperbolica();
+                        }
+                    }  
+                }
             }
         }
     }

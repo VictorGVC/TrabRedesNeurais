@@ -8,7 +8,7 @@
   </information>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="TrabRedesNeurais.jar" size="25948" download="eager" />
+    <jar href="TrabRedesNeurais.jar" size="35715" download="eager" />
     <jar href="lib\commons-lang3-3.12.0.jar" size="587402" download="eager" />
     <jar href="lib\jfoenix-8.0.8.jar" size="2708772" download="eager" />
     <jar href="lib\opencsv-5.4.jar" size="230363" download="eager" />
