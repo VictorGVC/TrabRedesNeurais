@@ -56,4 +56,10 @@ public class Treino
         this.saidas = saidas;
     }
 
+    public void calcularER()
+    {
+        for (int i = 0; i < saidas.size(); i++) 
+            erro+= Math.pow(saidas.get(i).getErro(), 2);
+        erro *= 0.5;
+    }
 }

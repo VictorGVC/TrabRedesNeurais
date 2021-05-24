@@ -71,4 +71,20 @@ public class Oculta
             for (int j = 0; j < n.size(); j++) 
                 ocultapeso[i][j] = (-2)+ r.nextDouble() * (2 - (2));
     }
+    
+    public void corrigePesoO(double aprendizagem, List<Double> erro)
+    {
+        for (int i = 0; i < n.size(); i++)
+            for (int j = 0; j < erro.size(); j++) 
+                ocultapeso[i][j] = ocultapeso[i][j] + 
+                        (aprendizagem * n.get(i).getErro() * erro.get(j));
+    }
+    
+    public void corrigePesoS(double aprendizagem, List<Double> erro)
+    {
+        for (int i = 0; i < erro.size(); i++)
+            for (int j = 0; j < n.size(); j++)
+                saidapeso[i][j] = saidapeso[i][j] + 
+                        (aprendizagem * erro.get(i) * n.get(j).getNetr());
+    }
 }

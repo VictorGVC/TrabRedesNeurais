@@ -80,5 +80,19 @@ public class Neuronio
     public void setNetr(double netr) {
         this.netr = netr;
     }
+
+    public void calculaErroS(int i) 
+    {
+        erro = (i-netr) * derivada;
+    }
+
+    public void calculaErroOculta(int pos, List<Double> camada, double[][] peso)
+    {
+        erro = 0;
+        for (int i = 0; i < camada.size(); i++)
+            erro += camada.get(i) * peso[i][pos];
+        
+        erro *= derivada;
+    }
     
 }

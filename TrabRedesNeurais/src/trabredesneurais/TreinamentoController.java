@@ -67,8 +67,6 @@ public class TreinamentoController implements Initializable {
         MaskFieldUtil.numericField(txoculta);
         MaskFieldUtil.numericField(txsaida);
         MaskFieldUtil.numericField(txiteracoes);
-        MaskFieldUtil.numericField(txerro);
-        MaskFieldUtil.numericField(txaprendizagem);
     }    
 
     @FXML
@@ -188,6 +186,7 @@ public class TreinamentoController implements Initializable {
         }
         if(flag) {
         
+            double aprendizagem = Double.parseDouble(txaprendizagem.getText());
             int oculta = Integer.parseInt(txoculta.getText());
             int entrada = Integer.parseInt(txentrada.getText());
             int saida = Integer.parseInt(txsaida.getText());
@@ -226,13 +225,14 @@ public class TreinamentoController implements Initializable {
                 int it = Integer.parseInt(txiteracoes.getText());
                 double ermin = Double.parseDouble(txerro.getText());
                 int saidad = 0;
-
+                
                 for (int i = 0; i < it && erroatual > ermin; i++) 
                 {
+                    erroatual = 0;
                     for (int k = 0; k < t.size(); k++) 
                     {
                         for (int j = 0; j < classes.size(); j++) 
-                            if(classes.get(j).equals(tvcsv.getItems().get(i).get(entrada)))
+                            if(classes.get(j).equals(tvcsv.getItems().get(k).get(entrada)))
                             {
                                 j = classes.size();
                                 saidad = j;
@@ -243,15 +243,52 @@ public class TreinamentoController implements Initializable {
 
                         for (int j = 0; j < oculta; j++) 
                         {
-                            t.get(i).getOculta().getNeuronio().get(j).calculaNet(j,t.get(i).getEntradas(),t.get(i).getOculta().getOcultapeso());
+                            t.get(k).getOculta().getNeuronio().get(j).calculaNet(j,t.get(k).getEntradas(),t.get(k).getOculta().getOcultapeso());
                             if(rblin.isSelected())
-                                t.get(i).getOculta().getNeuronio().get(j).setLinear();
+                                t.get(k).getOculta().getNeuronio().get(j).setLinear();
                             else if(rblog.isSelected())
-                                t.get(i).getOculta().getNeuronio().get(j).SetLogistica();
+                                t.get(k).getOculta().getNeuronio().get(j).SetLogistica();
                             else
-                                t.get(i).getOculta().getNeuronio().get(j).setHiperbolica();
+                                t.get(k).getOculta().getNeuronio().get(j).setHiperbolica();
                         }
-                    }  
+                        
+                        List<Double> oc = new ArrayList<>();
+                        for (int j = 0; j < oculta; j++) 
+                            oc.add(t.get(k).getOculta().getNeuronio().get(j).getNetr());
+                        
+                        for (int j = 0; j < saida; j++) 
+                        {
+                            t.get(k).getSaidas().get(j).calculaNet(j, oc, t.get(k).getOculta().getSaidapeso());
+                            
+                            if(rblin.isSelected())
+                                t.get(k).getSaidas().get(j).setLinear();
+                            else if(rblog.isSelected())
+                                t.get(k).getSaidas().get(j).SetLogistica();
+                            else
+                                t.get(k).getSaidas().get(j).setHiperbolica();
+                            
+                            t.get(k).getSaidas().get(j).calculaErroS(matrix[j][saidad]);
+                        }
+                        
+                        List<Double> erroS = new ArrayList<>();
+                        for (int j = 0; j < saida; j++) 
+                            erroS.add(t.get(k).getSaidas().get(j).getErro());
+                        
+                        for (int j = 0; j < oculta; j++)
+                            t.get(k).getOculta().getNeuronio().get(j).calculaErroOculta(j, erroS, t.get(k).getOculta().getOcultapeso());
+                        
+                        t.get(k).getOculta().corrigePesoS(aprendizagem, erroS);
+                        t.get(k).getOculta().corrigePesoO(aprendizagem, erroS);
+                        
+                        t.get(k).calcularER();
+                        
+                        erroatual += t.get(k).getErro();
+                        ocultapeso = t.get(k).getOculta().getOcultapeso();
+                        saidapeso = t.get(k).getOculta().getSaidapeso();
+                        moculta = ocultapeso;
+                        msaida = saidapeso;
+                    }
+                    erroatual /= t.size();
                 }
             }
         }

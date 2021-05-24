@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.shape.Line?>
 
-<AnchorPane prefHeight="446.0" prefWidth="600.0" styleClass="default" stylesheets="@../CSS/Dark.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="trabredesneurais.TreinamentoController">
+<AnchorPane prefHeight="446.0" prefWidth="600.0" styleClass="default" stylesheets="@../CSS/Dark.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="trabredesneurais.TreinamentoController">
    <children>
       <JFXTextField fx:id="txentrada" disable="true" labelFloat="true" layoutX="31.0" layoutY="38.0" promptText="Camadas de Entrada" />
       <JFXTextField fx:id="txoculta" labelFloat="true" layoutX="31.0" layoutY="81.0" promptText="Camadas Ocultas" />
@@ -33,7 +33,7 @@
          </toggleGroup></JFXRadioButton>
       <JFXRadioButton fx:id="rblog" layoutX="499.0" layoutY="55.0" styleClass="labeli" text="Logística" toggleGroup="$gay" />
       <JFXRadioButton fx:id="rbhiper" layoutX="455.0" layoutY="92.0" styleClass="labeli" text="Hiperbólica" toggleGroup="$gay" />
-      <JFXTextField fx:id="txaprendizagem" labelFloat="true" layoutX="431.0" layoutY="129.0" text="Taxa de Aprendizagem" />
+      <JFXTextField fx:id="txaprendizagem" labelFloat="true" layoutX="431.0" layoutY="129.0" promptText="Taxa de Aprendizagem" />
       <Line endX="-258.0" endY="108.0" layoutX="292.0" layoutY="81.0" startX="275.0" startY="108.0" />
       <JFXButton buttonType="RAISED" layoutX="34.0" layoutY="407.0" onAction="#clkTreinar" prefHeight="25.0" prefWidth="534.0" text="Treinar">
          <graphic>
