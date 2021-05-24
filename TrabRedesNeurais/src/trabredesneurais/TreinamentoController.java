@@ -1,5 +1,6 @@
 package trabredesneurais;
 
+import Models.Neuronio;
 import Models.Treino;
 import com.jfoenix.controls.JFXRadioButton;
 import com.jfoenix.controls.JFXTextField;
@@ -28,8 +29,11 @@ public class TreinamentoController implements Initializable {
 
     private CSVReader csvr;
     private List<Treino> t;
-    double[] maior;
-    double[] menor;
+    private double[] maior, menor;
+    private int[][] matrix;
+    private double[][] ocultapeso, saidapeso;
+    private List<double[][]> focutapeso, fsaidapeso;
+    private List<String> classes;
     
     @FXML
     private ToggleGroup gay;
@@ -81,7 +85,7 @@ public class TreinamentoController implements Initializable {
         int entrada = colstrings.size()-1;
         txentrada.setText(""+entrada);
         
-        List<String> classes = new ArrayList<>();
+        classes = new ArrayList<>();
         String[] line;
         List<String> lc;
         maior = new double[colstrings.size()-2];
@@ -125,24 +129,22 @@ public class TreinamentoController implements Initializable {
         double[] diferenca = new double[maior.length];
         t = new ArrayList<>();
         for (int i = 0; i < maior.length; i++) 
-        {
             diferenca[i] = maior[i]-menor[i];
-        }
         for (int j = 0; j < l.size(); j++) 
         {
             tr = new Treino();
             for (int k = 0; k < maior.length; k++) 
-            {
                 tr.getEntradas().add((Double.parseDouble(l.get(j).get(k))-menor[k])/diferenca[k]);
-            }
             t.add(tr);
         }
-        System.out.println("");
     }
 
     @FXML
     private void clkTreinar(ActionEvent event) 
     {
+        int oculta = Integer.parseInt(txoculta.getText());
+        int entrada = Integer.parseInt(txentrada.getText());
+        int saida = Integer.parseInt(txsaida.getText());
         int aux = Integer.parseInt(txaprendizagem.getText());
         if(aux<0||aux>1)
         {
@@ -153,6 +155,79 @@ public class TreinamentoController implements Initializable {
         {
             System.out.println("coloca aqui tbm que não foi colocado o arquivo de treinamento");
         }
+        else
+        {
+            //todos os campos ok.
+            geraMatrizDesejada();
+            double erroatual = Double.MAX_VALUE;
+            double[][] moculta = new double[oculta][entrada];
+            double[][] msaida = new double[saida][oculta];
+            
+            for (Treino treino : t) 
+            {
+                treino.getOculta().setCamada(entrada, oculta, saida);
+                for (int i = 0; i < saida; i++) 
+                    treino.getSaidas().add(new Neuronio());
+                treino.getOculta().rPeso(entrada, saida);
+            }
+            
+            for (int i = 0; i < saida; i++)
+            {
+                focutapeso.add(moculta);
+                fsaidapeso.add(msaida);
+            }
+            
+            int it = Integer.parseInt(txiteracoes.getText());
+            double ermin = Double.parseDouble(txerro.getText());
+            int saidad = 0;
+            for (int i = 0; i < it && erroatual > ermin; i++) 
+            {
+                for (int k = 0; k < t.size(); k++) 
+                {
+                    for (int j = 0; j < classes.size(); j++) 
+                    if(classes.get(j).equals(tvcsv.getItems().get(i).get(entrada)))
+                    {
+                        j = classes.size();
+                        saidad = j;
+                    }
+                
+                    focutapeso.set(saidad,t.get(k).getOculta().getOcultapeso());
+                    fsaidapeso.set(saidad,t.get(k).getOculta().getSaidapeso());
+                    
+                    for (int j = 0; j < oculta; j++) 
+                    {
+                        t.get(i).getOculta().getNeuronio().get(j).calculaNet(j,t.get(i).getEntradas(),t.get(i).getOculta().getOcultapeso());
+                        if(rblin.isSelected())
+                            t.get(i).getOculta().getNeuronio().get(j).setLinear();
+                        else if(rblog.isSelected())
+                            t.get(i).getOculta().getNeuronio().get(j).SetLogistica();
+                        else
+                            t.get(i).getOculta().getNeuronio().get(j).setHiperbolica();
+                    }
+                    
+                    
+                }
+                
+            }
+        }
+    }
+    
+    private void geraMatrizDesejada()
+    {
+        int saida = Integer.parseInt(txsaida.getText());
+        matrix = new int[saida][saida];
         
+        for (int i = 0; i < saida; i++) 
+            for (int j = 0; j < saida; j++) 
+                if(rbhiper.isSelected())
+                    if(i == j)
+                        matrix[i][j] = 1;
+                    else
+                        matrix[i][j] = -1;
+                else
+                    if(i == j)
+                        matrix[i][j] = 1;
+                    else
+                        matrix[i][j] = 0;
     }
 }

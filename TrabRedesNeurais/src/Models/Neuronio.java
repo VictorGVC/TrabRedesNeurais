@@ -5,13 +5,15 @@
  */
 package Models;
 
+import java.util.List;
+
 /**
  *
  * @author vicga
  */
 public class Neuronio 
 {
-    private double net,derivada,erro;
+    private double net,derivada,erro,netr;
 
     public Neuronio() {
     }
@@ -45,4 +47,38 @@ public class Neuronio
     public void setErro(double erro) {
         this.erro = erro;
     }
+    
+    public void calculaNet(int pos,List<Double> camada,double[][] peso)
+    {
+        net = 0;
+        for (int i = 0; i < camada.size() - 1; i++)
+            net += camada.get(i) * peso[pos][i];
+    }
+    
+    public void setLinear()
+    {
+        netr = net / 10.0;
+        derivada = 0.1;
+    }
+
+    public void SetLogistica()
+    {
+        netr = (1 / (1 + Math.pow(Math.E, (-net))));
+        derivada = netr * (1 - netr);
+    }
+
+    public void setHiperbolica()
+    {
+        netr = (((1 - (Math.pow(Math.E, (-2 * net))))) / (1 + (Math.pow(Math.E, (-2 * net)))));
+        derivada = (1 - (Math.pow(netr, 2)));
+    }
+
+    public double getNetr() {
+        return netr;
+    }
+
+    public void setNetr(double netr) {
+        this.netr = netr;
+    }
+    
 }
