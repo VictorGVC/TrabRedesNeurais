@@ -1,7 +1,7 @@
 package trabredesneurais;
 
-import Models.Neuronio;
-import Models.Treino;
+import models.Neuronio;
+import models.Treino;
 import com.jfoenix.controls.JFXRadioButton;
 import com.jfoenix.controls.JFXTextField;
 import com.opencsv.CSVReader;
@@ -20,6 +20,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleGroup;
@@ -146,18 +147,32 @@ public class TreinamentoController implements Initializable {
         int entrada = Integer.parseInt(txentrada.getText());
         int saida = Integer.parseInt(txsaida.getText());
         int aux = Integer.parseInt(txaprendizagem.getText());
-        if(aux<0||aux>1)
+        boolean flag = true;
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        
+        if(aux < 0 || aux > 1)
         {
             //ATENCAO ATENCAO, O CARRO DO OVO ESTÁ PASSANDO NA SUA RUA
-            System.out.println("coloca erro que ta invalido aqui Mateus por favor");
+            //OLHA O CARRO DO DANONE EINNNNNN
+            a.setTitle("Treinar");
+            a.setHeaderText("Atenção!");
+            a.setContentText("Taxa Inválida! Insira um Valor Entre 0 e 1");
+            a.showAndWait();
+            flag = false;
         }
         if(csvr == null)
         {
-            System.out.println("coloca aqui tbm que não foi colocado o arquivo de treinamento");
+            a.setTitle("Treinar");
+            a.setHeaderText("Atenção!");
+            a.setContentText("Arquivo Não Aberto");
+            a.showAndWait();
+            try { clkArq(null); } catch(Exception e) {}
+            flag = false;
         }
-        else
+        if(flag)
         {
             //todos os campos ok.
+            //boa gay
             geraMatrizDesejada();
             double erroatual = Double.MAX_VALUE;
             double[][] moculta = new double[oculta][entrada];
@@ -180,16 +195,17 @@ public class TreinamentoController implements Initializable {
             int it = Integer.parseInt(txiteracoes.getText());
             double ermin = Double.parseDouble(txerro.getText());
             int saidad = 0;
+            
             for (int i = 0; i < it && erroatual > ermin; i++) 
             {
                 for (int k = 0; k < t.size(); k++) 
                 {
                     for (int j = 0; j < classes.size(); j++) 
-                    if(classes.get(j).equals(tvcsv.getItems().get(i).get(entrada)))
-                    {
-                        j = classes.size();
-                        saidad = j;
-                    }
+                        if(classes.get(j).equals(tvcsv.getItems().get(i).get(entrada)))
+                        {
+                            j = classes.size();
+                            saidad = j;
+                        }
                 
                     focutapeso.set(saidad,t.get(k).getOculta().getOcultapeso());
                     fsaidapeso.set(saidad,t.get(k).getOculta().getSaidapeso());
@@ -204,10 +220,7 @@ public class TreinamentoController implements Initializable {
                         else
                             t.get(i).getOculta().getNeuronio().get(j).setHiperbolica();
                     }
-                    
-                    
-                }
-                
+                }  
             }
         }
     }
