@@ -15,12 +15,15 @@ import java.util.List;
  */
 public class Treino 
 {    
-    private List<Double> entradas = new ArrayList<>();
-    private List<Neuronio> saidas = new ArrayList<>();
+    private List<Double> entradas;
+    private List<Neuronio> saidas;
     private Oculta o;
     private double erro;
 
-    public Treino() {
+    public Treino() 
+    {
+        saidas = new ArrayList<>();
+        entradas = new ArrayList();
         o = new Oculta();
     }
     

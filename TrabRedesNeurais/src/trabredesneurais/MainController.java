@@ -25,20 +25,6 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
-        try {
-            URL oUrl = new URL("http://www.soundjay.com/button/beep-02.wav");
-            Clip oClip = AudioSystem.getClip();
-            AudioInputStream oStream = AudioSystem.getAudioInputStream(oUrl);
-            oClip.open(oStream);
-            oClip.loop(0);
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (LineUnavailableException ex) {
-            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (UnsupportedAudioFileException ex) {
-            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
     }    
 }

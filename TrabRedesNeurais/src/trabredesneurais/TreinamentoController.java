@@ -6,6 +6,7 @@ import util.MaskFieldUtil;
 import com.jfoenix.controls.JFXRadioButton;
 import com.jfoenix.controls.JFXTextField;
 import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 import com.opencsv.exceptions.CsvValidationException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,8 +31,9 @@ import javafx.stage.FileChooser;
 public class TreinamentoController implements Initializable {
 
     private CSVReader csvr;
+    List<List<String>> l;
     private List<Treino> t;
-    private double[] maior, menor;
+    private double[] maior, menor,diferenca;
     private int[][] matrix;
     private double[][] ocultapeso, saidapeso;
     private List<double[][]> focutapeso, fsaidapeso;
@@ -67,10 +69,14 @@ public class TreinamentoController implements Initializable {
         MaskFieldUtil.numericField(txoculta);
         MaskFieldUtil.numericField(txsaida);
         MaskFieldUtil.numericField(txiteracoes);
+        txaprendizagem.setText(""+0.9);
+        txerro.setText(""+0);
+        txiteracoes.setText(""+500);
+        rblin.setSelected(true);
     }    
 
     @FXML
-    private void clkArq(ActionEvent event) throws FileNotFoundException, IOException, CsvValidationException 
+    private void clkArq(ActionEvent event) throws FileNotFoundException, IOException, CsvValidationException, CsvException 
     {
         FileChooser fc = new FileChooser();
         
@@ -91,7 +97,6 @@ public class TreinamentoController implements Initializable {
         txentrada.setText(""+entrada);
         
         classes = new ArrayList<>();
-        String[] line;
         List<String> lc;
         maior = new double[colstrings.size()-2];
         menor = new double[colstrings.size()-2];
@@ -102,51 +107,66 @@ public class TreinamentoController implements Initializable {
             menor[i] = Double.MAX_VALUE;
         }
         
-        List<List<String>> l = new ArrayList<>();
+        l = new ArrayList<>();
         
-        while((line = csvr.readNext()) != null)
+        List<String[]> all = csvr.readAll();
+        for (String[] line : all)
         {
             lc = Arrays.asList(line);
-            for (int i = 0; i < maior.length; i++)
-            {
-                if(Integer.parseInt(line[i]) > maior[i])
-                    maior[i] = Double.parseDouble(line[i]);
-                if(Integer.parseInt(line[i]) < menor[i])
-                    menor[i] = Double.parseDouble(line[i]);
-            }
             
-            if(!classes.contains(lc.get(lc.size()-1)))
-                classes.add(lc.get(lc.size()-1));
             tvcsv.getItems().add(lc);
             l.add(lc);
+            if(!classes.contains(line[line.length-1]))
+                classes.add(line[line.length-1]);
         }  
+        lc = null;
+        all = null;
         
-        geraCamadaEntrada(l);
+        maimen();
+        geraCamadaEntrada();
         
         int saida = classes.size();
         txsaida.setText(""+saida);
         txoculta.setText(""+((entrada+saida)/2));
     }
     
-    private void geraCamadaEntrada(List<List<String>> l)
+    public void maimen()
     {
-        Treino tr;
-        double[] diferenca = new double[maior.length];
-        t = new ArrayList<>();
+        for (int i = 0; i < l.size(); i++)
+        {
+            for (int j = 0; j < maior.length; j++)
+            {
+                if(Integer.parseInt(l.get(i).get(j)) > maior[j])
+                    maior[j] = Double.parseDouble(l.get(i).get(j));
+                if(Integer.parseInt(l.get(i).get(j)) < menor[j])
+                    menor[j] = Double.parseDouble(l.get(i).get(j));
+            }
+        }
+        diferenca = new double[maior.length];
         for (int i = 0; i < maior.length; i++) 
             diferenca[i] = maior[i]-menor[i];
+    }
+    
+    private void geraCamadaEntrada()
+    {
+        Treino tr;
+        t = new ArrayList<>();
         for (int j = 0; j < l.size(); j++) 
         {
             tr = new Treino();
             for (int k = 0; k < maior.length; k++) 
+            {
                 tr.getEntradas().add((Double.parseDouble(l.get(j).get(k))-menor[k])/diferenca[k]);
-            t.add(tr);
+            }
+           t.add(tr);
         }
     }
 
     @FXML
     private void clkTreinar(ActionEvent event) 
     {
+        focutapeso = new ArrayList<>();
+        fsaidapeso = new ArrayList<>();
         boolean flag = true;
         Alert a = new Alert(Alert.AlertType.INFORMATION);
         
@@ -156,18 +176,6 @@ public class TreinamentoController implements Initializable {
         if(txoculta.getText().equals("")) {
             
             a.setContentText("Quantidade de Camadas Ocultas é Necessaria");
-            a.showAndWait();
-            flag = false;
-        }
-        if(txentrada.getText().equals("")) {
-            
-            a.setContentText("Quantidade de Camadas de Entrada é Necessaria");
-            a.showAndWait();
-            flag = false;
-        }
-        if(txsaida.getText().equals("")) {
-            
-            a.setContentText("Quantidade de Camadas de Saída é Necessaria");
             a.showAndWait();
             flag = false;
         }
@@ -190,10 +198,9 @@ public class TreinamentoController implements Initializable {
             int oculta = Integer.parseInt(txoculta.getText());
             int entrada = Integer.parseInt(txentrada.getText());
             int saida = Integer.parseInt(txsaida.getText());
-            int aux = Integer.parseInt(txaprendizagem.getText());
 
             flag = true;
-            if(aux < 0 || aux > 1)
+            if(aprendizagem < 0 || aprendizagem > 1)
             {
                 //ATENCAO ATENCAO, O CARRO DO OVO ESTÁ PASSANDO NA SUA RUA
                 //OLHA O CARRO DO DANONE EINNNNNN
@@ -221,7 +228,7 @@ public class TreinamentoController implements Initializable {
                     focutapeso.add(moculta);
                     fsaidapeso.add(msaida);
                 }
-
+                
                 int it = Integer.parseInt(txiteracoes.getText());
                 double ermin = Double.parseDouble(txerro.getText());
                 int saidad = 0;
@@ -234,8 +241,8 @@ public class TreinamentoController implements Initializable {
                         for (int j = 0; j < classes.size(); j++) 
                             if(classes.get(j).equals(tvcsv.getItems().get(k).get(entrada)))
                             {
-                                j = classes.size();
                                 saidad = j;
+                                j = classes.size();
                             }
 
                         focutapeso.set(saidad,t.get(k).getOculta().getOcultapeso());
@@ -254,7 +261,7 @@ public class TreinamentoController implements Initializable {
                         
                         List<Double> oc = new ArrayList<>();
                         for (int j = 0; j < oculta; j++) 
-                            oc.add(t.get(k).getOculta().getNeuronio().get(j).getNetr());
+                            oc.add(t.get(k).getOculta().getNeuronio().get(j).getFnet());
                         
                         for (int j = 0; j < saida; j++) 
                         {
@@ -311,5 +318,7 @@ public class TreinamentoController implements Initializable {
                         matrix[i][j] = 1;
                     else
                         matrix[i][j] = 0;
+        
+        System.out.println("");
     }
 }

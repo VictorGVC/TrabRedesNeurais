@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class Neuronio 
 {
-    private double net,derivada,erro,netr;
+    private double net,derivada,erro,fnet;
 
     public Neuronio() {
     }
@@ -51,39 +51,39 @@ public class Neuronio
     public void calculaNet(int pos,List<Double> camada,double[][] peso)
     {
         net = 0;
-        for (int i = 0; i < camada.size() - 1; i++)
+        for (int i = 0; i < camada.size(); i++)
             net += camada.get(i) * peso[pos][i];
     }
     
     public void setLinear()
     {
-        netr = net / 10.0;
+        fnet = net / 10.0;
         derivada = 0.1;
     }
 
     public void SetLogistica()
     {
-        netr = (1 / (1 + Math.pow(Math.E, (-net))));
-        derivada = netr * (1 - netr);
+        fnet = (1 / (1 + Math.pow(Math.E, (-net))));
+        derivada = fnet * (1 - fnet);
     }
 
     public void setHiperbolica()
     {
-        netr = (((1 - (Math.pow(Math.E, (-2 * net))))) / (1 + (Math.pow(Math.E, (-2 * net)))));
-        derivada = (1 - (Math.pow(netr, 2)));
+        fnet = (((1 - (Math.pow(Math.E, (-2 * net))))) / (1 + (Math.pow(Math.E, (-2 * net)))));
+        derivada = (1 - (Math.pow(fnet, 2)));
     }
 
-    public double getNetr() {
-        return netr;
+    public double getFnet() {
+        return fnet;
     }
 
-    public void setNetr(double netr) {
-        this.netr = netr;
+    public void setFnet(double fnet) {
+        this.fnet = fnet;
     }
 
     public void calculaErroS(int i) 
     {
-        erro = (i-netr) * derivada;
+        erro = (i-fnet) * derivada;
     }
 
     public void calculaErroOculta(int pos, List<Double> camada, double[][] peso)
