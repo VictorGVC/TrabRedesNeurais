@@ -346,4 +346,8 @@ public class MainController implements Initializable {
             
         }
     }
+
+    @FXML
+    private void clkArqTeste(ActionEvent event) {
+    }
 }
