@@ -68,7 +68,7 @@ public class MainController implements Initializable {
     @FXML
     private TableView<List<String>> tvdados;
     @FXML
-    private TableView<?> tvconfusao;
+    private TableView<List<String>> tvconfusao;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -169,6 +169,7 @@ public class MainController implements Initializable {
         l = new ArrayList<>();
         
         List<String[]> all = csvr.readAll();
+        csvr.close();
         for (String[] line : all)
         {
             lc = Arrays.asList(line);
@@ -415,11 +416,37 @@ public class MainController implements Initializable {
                         posm = j;
                     }
                 }
-                
                 conf[posm][saidad]++;
             }
+            List<String> outconf = new ArrayList<>();
+            outconf.add("   ");
+            outconf.addAll(classes);
+            for (int j = 0; j < outconf.size(); j++) 
+            {
+                final int i = j;
+                TableColumn<List<String>,String> col = new TableColumn<>(outconf.get(j).toUpperCase());
+                col.setCellValueFactory((v) -> new SimpleStringProperty(v.getValue().get(i)));
+                tvconfusao.getColumns().add(col);
+            }
+            int acerto = 0;
+            int erro = 0;
+            for (int i = 0; i < conf.length; i++) 
+            {
+                outconf = new ArrayList<>();
+                outconf.add(classes.get(i));
+                for (int j = 0; j < conf[i].length; j++) 
+                {
+                    outconf.add(""+conf[i][j]);
+                    if(i == j)
+                        acerto+=conf[i][j];
+                    else
+                        erro+=conf[i][j];
+                }
+                    
+                tvconfusao.getItems().add(outconf);
+            }
             
-            System.out.println("");
+            int div = acerto+erro;
         }
         
     }
@@ -448,6 +475,7 @@ public class MainController implements Initializable {
         l = new ArrayList<>();
         
         List<String[]> all = csvr.readAll();
+        csvr.close();
         for (String[] line : all)
         {
             lc = Arrays.asList(line);
