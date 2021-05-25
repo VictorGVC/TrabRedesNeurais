@@ -3,6 +3,7 @@ package trabredesneurais;
 import Models.Neuronio;
 import Models.Treino;
 import com.jfoenix.controls.JFXRadioButton;
+import com.jfoenix.controls.JFXSnackbar;
 import com.jfoenix.controls.JFXTextField;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
@@ -21,10 +22,12 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import util.MaskFieldUtil;
 
@@ -38,6 +41,7 @@ public class MainController implements Initializable {
     private double[][] ocultapeso, saidapeso;
     private List<double[][]> focutapeso, fsaidapeso;
     private List<String> classes;
+    private boolean treinado = false;
     
     @FXML
     private Tab tbTreinamento;
@@ -56,8 +60,6 @@ public class MainController implements Initializable {
     @FXML
     private JFXRadioButton rblin;
     @FXML
-    private ToggleGroup gay;
-    @FXML
     private JFXRadioButton rblog;
     @FXML
     private JFXRadioButton rbhiper;
@@ -69,19 +71,31 @@ public class MainController implements Initializable {
     private TableView<List<String>> tvdados;
     @FXML
     private TableView<List<String>> tvconfusao;
+    @FXML
+    private Label lbacerto;
+    @FXML
+    private Label lberro;
+    @FXML
+    private AnchorPane pntreinamento;
+    @FXML
+    private AnchorPane pnteste;
+    @FXML
+    private ToggleGroup group;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        
+        setMask();
+        rblin.setSelected(true);
+    }   
+    
+    private void setMask() {
         
         MaskFieldUtil.numericField(txentrada);
         MaskFieldUtil.numericField(txoculta);
         MaskFieldUtil.numericField(txsaida);
         MaskFieldUtil.numericField(txiteracoes);
-        txaprendizagem.setText(""+0.9);
-        txerro.setText(""+0);
-        txiteracoes.setText(""+500);
-        rblin.setSelected(true);
-    }   
+    }
     
     public void maimen()
     {
@@ -130,13 +144,57 @@ public class MainController implements Initializable {
                         matrix[i][j] = 1;
                     else
                         matrix[i][j] = 0;
+    }
+    
+    private void printaResul(boolean b) {
         
-        System.out.println("");
+        String txt = "";
+        AnchorPane ap = null;
+        
+        if(b) {
+            
+            txt = "Treino Realizado";
+            ap = pntreinamento;
+        } 
+        else {
+            
+            txt = "Teste Realizado";
+            ap = pnteste;
+        }
+            
+        JFXSnackbar sb = new JFXSnackbar(ap); 
+        Label l = new Label();
+
+        l.setText(txt);
+        l.setPrefSize(170, 10);
+        l.setStyle("-fx-background-color: #32CD32;"
+                + "-fx-background-radius: 5; -fx-border-radius: 5; "
+                + "-fx-alignment: center;");
+        sb.enqueue(new JFXSnackbar.SnackbarEvent(l));
+    }
+    
+    private void limpa() {
+        
+        csvr = null;
+        l = null;
+        t = null;
+        rblin.setSelected(true);
+        lbacerto.setText("Taxa de Acerto: ");
+        lbacerto.setVisible(false);
+        lberro.setText("Taxa de Erro: ");
+        lberro.setVisible(false);
+        tvcsv.getColumns().clear();
+        tvdados.getColumns().clear();
+        tvconfusao.getColumns().clear();
+        tvcsv.getItems().clear();
+        tvdados.getItems().clear();
+        tvconfusao.getItems().clear();
     }
 
     @FXML
     private void clkArq(ActionEvent event) throws IOException, CsvException 
     {    
+        limpa();
         FileChooser fc = new FileChooser();
         
         fc.setTitle("Abrir Arquivo CSV");
@@ -186,8 +244,9 @@ public class MainController implements Initializable {
         geraCamadaEntrada();
         
         int saida = classes.size();
-        txsaida.setText(""+saida);
-        txoculta.setText(""+((entrada+saida)/2));
+        txsaida.setText("" + saida);
+        txoculta.setText("" + ((entrada+saida)/2));
+        treinado = false;
     }
 
     @FXML
@@ -230,8 +289,6 @@ public class MainController implements Initializable {
             flag = true;
             if(aprendizagem < 0 || aprendizagem > 1)
             {
-                //ATENCAO ATENCAO, O CARRO DO OVO ESTÁ PASSANDO NA SUA RUA
-                //OLHA O CARRO DO DANONE EINNNNNN
                 a.setContentText("Taxa Inválida! Insira um Valor Entre 0 e 1");
                 a.showAndWait();
                 flag = false;
@@ -325,8 +382,9 @@ public class MainController implements Initializable {
                     }
                     erroatual /= t.size();
                 }
-                //coloca uma mensagem aqui que apareça na tela q terminou o treino
-                System.out.println("treinou");
+                
+                printaResul(true);
+                treinado = true;
             }
         }
     }
@@ -336,11 +394,7 @@ public class MainController implements Initializable {
         
         Alert a = new Alert(Alert.AlertType.INFORMATION);
         
-        int entrada = Integer.parseInt(txentrada.getText());
-        int oculta = Integer.parseInt(txoculta.getText());
-        int saida = Integer.parseInt(txsaida.getText());
-        
-        a.setTitle("Treinar");
+        a.setTitle("Testar");
         a.setHeaderText("Atenção!");
         if(csvr == null) 
         {
@@ -348,8 +402,17 @@ public class MainController implements Initializable {
             a.showAndWait();
             try { clkArq(null); } catch(Exception e) {}
         }
+        if(!treinado) {
+            
+            a.setContentText("Treino não Realizado");
+            a.showAndWait();
+        }
         else 
         {
+            int entrada = Integer.parseInt(txentrada.getText());
+            int oculta = Integer.parseInt(txoculta.getText());
+            int saida = Integer.parseInt(txsaida.getText());
+            
             int[][] conf = new int[saida][saida];
             for (Treino tr : t) 
             {
@@ -362,8 +425,6 @@ public class MainController implements Initializable {
             
             for (int i = 0; i < t.size(); i++) 
             {
-                if(tvdados.getItems().get(i).get(entrada).equals("CD"))
-                    System.out.println("");
                 for (int j = 0; j < classes.size(); j++) 
                     if(classes.get(j).equals(tvdados.getItems().get(i).get(entrada)))
                     {
@@ -428,25 +489,32 @@ public class MainController implements Initializable {
                 col.setCellValueFactory((v) -> new SimpleStringProperty(v.getValue().get(i)));
                 tvconfusao.getColumns().add(col);
             }
-            int acerto = 0;
-            int erro = 0;
+            double acerto = 0;
+            double erro = 0;
             for (int i = 0; i < conf.length; i++) 
             {
                 outconf = new ArrayList<>();
                 outconf.add(classes.get(i));
                 for (int j = 0; j < conf[i].length; j++) 
                 {
-                    outconf.add(""+conf[i][j]);
+                    outconf.add("" + conf[i][j]);
                     if(i == j)
-                        acerto+=conf[i][j];
+                        acerto += conf[i][j];
                     else
-                        erro+=conf[i][j];
+                        erro += conf[i][j];
                 }
                     
                 tvconfusao.getItems().add(outconf);
             }
             
-            int div = acerto+erro;
+            double div = acerto + erro;
+            
+            lbacerto.setVisible(true);
+            lbacerto.setText(lbacerto.getText() + String.format("%.2f", acerto / div * 100) + "%");
+            
+            lberro.setVisible(true);
+            lberro.setText(lberro.getText() + String.format("%.2f", erro / div * 100) + "%");
+            printaResul(false);
         }
         
     }
@@ -454,38 +522,48 @@ public class MainController implements Initializable {
     @FXML
     private void clkArqTeste(ActionEvent event) throws IOException, CsvValidationException, CsvException 
     {
-        //COLOCA UM IF AQUI QUE PRECISA TER TREINADO ANTES PARA CONSEGUIR ESCOLHER O ARQUIVO DE TESTE
-        FileChooser fc = new FileChooser();
-        
-        fc.setTitle("Abrir Arquivo CSV");
-        Reader reader = Files.newBufferedReader(Paths.get(fc.showOpenDialog(null).toURI()));
-        csvr = new CSVReader(reader);
-
-        List<String> colstrings = Arrays.asList(csvr.readNext());
-        for (int j = 0; j < colstrings.size(); j++) 
-        {
-            final int i = j;
-            TableColumn<List<String>,String> col = new TableColumn<>(colstrings.get(j).toUpperCase());
-            col.setCellValueFactory((v) -> new SimpleStringProperty(v.getValue().get(i)));
-            tvdados.getColumns().add(col);
-        }
-        
-        List<String> lc;
-                
-        l = new ArrayList<>();
-        
-        List<String[]> all = csvr.readAll();
-        csvr.close();
-        for (String[] line : all)
-        {
-            lc = Arrays.asList(line);
+        if(treinado) {
             
-            tvdados.getItems().add(lc);
-            l.add(lc);
-        }  
-        lc = null;
-        all = null;
+            FileChooser fc = new FileChooser();
         
-        geraCamadaEntrada();
+            fc.setTitle("Abrir Arquivo CSV");
+            Reader reader = Files.newBufferedReader(Paths.get(fc.showOpenDialog(null).toURI()));
+            csvr = new CSVReader(reader);
+
+            List<String> colstrings = Arrays.asList(csvr.readNext());
+            for (int j = 0; j < colstrings.size(); j++) 
+            {
+                final int i = j;
+                TableColumn<List<String>,String> col = new TableColumn<>(colstrings.get(j).toUpperCase());
+                col.setCellValueFactory((v) -> new SimpleStringProperty(v.getValue().get(i)));
+                tvdados.getColumns().add(col);
+            }
+
+            List<String> lc;
+
+            l = new ArrayList<>();
+
+            List<String[]> all = csvr.readAll();
+            csvr.close();
+            for (String[] line : all)
+            {
+                lc = Arrays.asList(line);
+
+                tvdados.getItems().add(lc);
+                l.add(lc);
+            }  
+            lc = null;
+            all = null;
+
+            geraCamadaEntrada();
+        }
+        else {
+            
+            Alert a = new Alert(Alert.AlertType.INFORMATION);
+            a.setTitle("Testar");
+            a.setHeaderText("Atenção!");
+            a.setContentText("Treino não Realizado");
+            a.showAndWait();
+        }
     }
 }

@@ -12,6 +12,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.shape.Line?>
+<?import javafx.scene.text.Font?>
 
 <JFXTabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="560.0" prefWidth="800.0" stylesheets="@../CSS/Tab.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="trabredesneurais.MainController">
     <tabs>
@@ -19,6 +20,7 @@
          <content>
             <AnchorPane prefHeight="520.0" prefWidth="600.0" styleClass="default" stylesheets="@../CSS/Dark.css">
                <children>
+                  <AnchorPane fx:id="pntreinamento" prefHeight="520.0" prefWidth="800.0" />
                   <JFXTextField fx:id="txentrada" disable="true" labelFloat="true" layoutX="31.0" layoutY="180.0" prefWidth="150.0" promptText="Camadas de Entrada" />
                   <JFXTextField fx:id="txoculta" labelFloat="true" layoutX="31.0" layoutY="223.0" prefWidth="150.0" promptText="Camadas Ocultas" />
                   <JFXTextField fx:id="txsaida" disable="true" labelFloat="true" layoutX="31.0" layoutY="271.0" prefWidth="150.0" promptText="Camadas de Saída" />
@@ -32,17 +34,17 @@
                         </ImageView>
                      </graphic>
                   </JFXButton>
-                  <JFXTextField fx:id="txiteracoes" labelFloat="true" layoutX="32.0" layoutY="78.0" prefWidth="150.0" promptText="Iterações" />
-                  <JFXTextField fx:id="txerro" labelFloat="true" layoutX="32.0" layoutY="126.0" prefWidth="150.0" promptText="Erro" />
+                  <JFXTextField fx:id="txiteracoes" labelFloat="true" layoutX="32.0" layoutY="78.0" prefWidth="150.0" promptText="Iterações" text="500" />
+                  <JFXTextField fx:id="txerro" labelFloat="true" layoutX="32.0" layoutY="126.0" prefWidth="150.0" promptText="Erro" text="0" />
                   <Line endX="-61.0" endY="108.0" layoutX="251.0" layoutY="213.0" startX="-225.0" startY="108.0" />
                   <JFXRadioButton fx:id="rblin" layoutX="27.0" layoutY="332.0" styleClass="labeli" text="Linear">
                      <toggleGroup>
-                        <ToggleGroup fx:id="gay" />
+                        <ToggleGroup fx:id="group" />
                      </toggleGroup>
                   </JFXRadioButton>
-                  <JFXRadioButton fx:id="rblog" layoutX="100.0" layoutY="332.0" styleClass="labeli" text="Logística" toggleGroup="$gay" />
-                  <JFXRadioButton fx:id="rbhiper" layoutX="56.0" layoutY="369.0" styleClass="labeli" text="Hiperbólica" toggleGroup="$gay" />
-                  <JFXTextField fx:id="txaprendizagem" labelFloat="true" layoutX="32.0" layoutY="406.0" prefWidth="150.0" promptText="Taxa de Aprendizagem" />
+                  <JFXRadioButton fx:id="rblog" layoutX="100.0" layoutY="332.0" styleClass="labeli" text="Logística" toggleGroup="$group" />
+                  <JFXRadioButton fx:id="rbhiper" layoutX="56.0" layoutY="369.0" styleClass="labeli" text="Hiperbólica" toggleGroup="$group" />
+                  <JFXTextField fx:id="txaprendizagem" labelFloat="true" layoutX="32.0" layoutY="406.0" prefWidth="150.0" promptText="Taxa de Aprendizagem" text="0.9" />
                   <JFXButton buttonType="RAISED" layoutX="30.0" layoutY="464.0" onAction="#clkTreinar" prefHeight="27.0" prefWidth="731.0" text="Treinar">
                      <graphic>
                         <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
@@ -60,6 +62,7 @@
          <content>
             <AnchorPane prefHeight="446.0" prefWidth="600.0" styleClass="default" stylesheets="@../CSS/Dark.css">
                <children>
+                  <AnchorPane fx:id="pnteste" prefHeight="520.0" prefWidth="800.0" />
                   <JFXButton buttonType="RAISED" layoutX="14.0" layoutY="15.0" onAction="#clkArqTeste" prefHeight="25.0" prefWidth="370.0" text="Selecionar Arquivo">
                      <graphic>
                         <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
@@ -81,6 +84,16 @@
                   </JFXButton>
                   <Label layoutX="414.0" layoutY="28.0" styleClass="labeli" text="Matriz de Confusão:" />
                   <TableView fx:id="tvconfusao" layoutX="414.0" layoutY="58.0" prefHeight="200.0" prefWidth="370.0" />
+                  <Label fx:id="lbacerto" layoutX="414.0" layoutY="274.0" styleClass="labeli" text="Taxa de Acerto: " visible="false">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="lberro" layoutX="414.0" layoutY="306.0" styleClass="labeli" text="Taxa de Erro: " visible="false">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
                </children>
             </AnchorPane>
          </content></Tab>
