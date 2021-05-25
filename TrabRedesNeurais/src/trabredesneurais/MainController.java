@@ -6,6 +6,7 @@ import com.jfoenix.controls.JFXRadioButton;
 import com.jfoenix.controls.JFXTextField;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
+import com.opencsv.exceptions.CsvValidationException;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
@@ -107,10 +108,8 @@ public class MainController implements Initializable {
         {
             tr = new Treino();
             for (int k = 0; k < maior.length; k++) 
-            {
                 tr.getEntradas().add((Double.parseDouble(l.get(j).get(k))-menor[k])/diferenca[k]);
-            }
-           t.add(tr);
+            t.add(tr);
         }
     } 
     
@@ -136,8 +135,8 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    private void clkArq(ActionEvent event) throws IOException, CsvException {
-        
+    private void clkArq(ActionEvent event) throws IOException, CsvException 
+    {    
         FileChooser fc = new FileChooser();
         
         fc.setTitle("Abrir Arquivo CSV");
@@ -325,6 +324,8 @@ public class MainController implements Initializable {
                     }
                     erroatual /= t.size();
                 }
+                //coloca uma mensagem aqui que apareça na tela q terminou o treino
+                System.out.println("treinou");
             }
         }
     }
@@ -334,20 +335,129 @@ public class MainController implements Initializable {
         
         Alert a = new Alert(Alert.AlertType.INFORMATION);
         
+        int entrada = Integer.parseInt(txentrada.getText());
+        int oculta = Integer.parseInt(txoculta.getText());
+        int saida = Integer.parseInt(txsaida.getText());
+        
         a.setTitle("Treinar");
         a.setHeaderText("Atenção!");
-        if(csvr == null) {
-            
+        if(csvr == null) 
+        {
             a.setContentText("Arquivo Não Aberto");
             a.showAndWait();
             try { clkArq(null); } catch(Exception e) {}
         }
-        else {
+        else 
+        {
+            int[][] conf = new int[saida][saida];
+            for (Treino tr : t) 
+            {
+                tr.getOculta().setCamada(entrada, oculta, saida);
+                for (int i = 0; i < saida; i++) 
+                    tr.getSaidas().add(new Neuronio());
+            }
             
+            int saidad = 0;
+            
+            for (int i = 0; i < t.size(); i++) 
+            {
+                if(tvdados.getItems().get(i).get(entrada).equals("CD"))
+                    System.out.println("");
+                for (int j = 0; j < classes.size(); j++) 
+                    if(classes.get(j).equals(tvdados.getItems().get(i).get(entrada)))
+                    {
+                        saidad = j;
+                        j = classes.size();
+                    }
+                
+                t.get(i).getOculta().setOcultapeso(focutapeso.get(saidad));
+                t.get(i).getOculta().setSaidapeso(fsaidapeso.get(saidad));
+                
+                for (int j = 0; j < oculta; j++)
+                {
+                    t.get(i).getOculta().getNeuronio().get(j).calculaNet(j, t.get(i).getEntradas(),t.get(i).getOculta().getOcultapeso());
+                    if(rblin.isSelected())
+                        t.get(i).getOculta().getNeuronio().get(j).setLinear();
+                    else if(rblog.isSelected())
+                        t.get(i).getOculta().getNeuronio().get(j).SetLogistica();
+                    else
+                        t.get(i).getOculta().getNeuronio().get(j).setHiperbolica();
+                }
+                
+                List<Double> lfnet = new ArrayList<>();
+                List<Double> loculta = new ArrayList<>();
+                
+                for (int j = 0; j < oculta; j++) 
+                    loculta.add(t.get(i).getOculta().getNeuronio().get(j).getFnet());
+                
+                for (int j = 0; j < saida; j++) 
+                {
+                    t.get(i).getSaidas().get(j).calculaNet(j, loculta, t.get(i).getOculta().getSaidapeso());
+                    
+                    if(rblin.isSelected())
+                        t.get(i).getSaidas().get(j).setLinear();
+                    else if(rblog.isSelected())
+                        t.get(i).getSaidas().get(j).SetLogistica();
+                    else
+                        t.get(i).getSaidas().get(j).setHiperbolica();
+                    
+                    lfnet.add(t.get(i).getSaidas().get(j).getFnet());
+                }
+                
+                double maior = lfnet.get(0);
+                int posm = 0;
+                
+                for (int j = 0; j < saida; j++) 
+                {
+                    if(lfnet.get(j) > maior)
+                    {
+                        maior = lfnet.get(j);
+                        posm = j;
+                    }
+                }
+                
+                conf[posm][saidad]++;
+            }
+            
+            System.out.println("");
         }
+        
     }
 
     @FXML
-    private void clkArqTeste(ActionEvent event) {
+    private void clkArqTeste(ActionEvent event) throws IOException, CsvValidationException, CsvException 
+    {
+        //COLOCA UM IF AQUI QUE PRECISA TER TREINADO ANTES PARA CONSEGUIR ESCOLHER O ARQUIVO DE TESTE
+        FileChooser fc = new FileChooser();
+        
+        fc.setTitle("Abrir Arquivo CSV");
+        Reader reader = Files.newBufferedReader(Paths.get(fc.showOpenDialog(null).toURI()));
+        csvr = new CSVReader(reader);
+
+        List<String> colstrings = Arrays.asList(csvr.readNext());
+        for (int j = 0; j < colstrings.size(); j++) 
+        {
+            final int i = j;
+            TableColumn<List<String>,String> col = new TableColumn<>(colstrings.get(j).toUpperCase());
+            col.setCellValueFactory((v) -> new SimpleStringProperty(v.getValue().get(i)));
+            tvdados.getColumns().add(col);
+        }
+        
+        List<String> lc;
+                
+        l = new ArrayList<>();
+        
+        List<String[]> all = csvr.readAll();
+        for (String[] line : all)
+        {
+            lc = Arrays.asList(line);
+            
+            tvdados.getItems().add(lc);
+            l.add(lc);
+        }  
+        lc = null;
+        all = null;
+        
+        geraCamadaEntrada();
     }
 }
