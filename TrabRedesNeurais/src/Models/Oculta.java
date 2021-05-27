@@ -65,18 +65,18 @@ public class Oculta
         Random r = new Random();
         for (int i = 0; i < n.size(); i++) 
             for (int j = 0; j < entradas; j++) 
-                ocultapeso[i][j] = (-2) + r.nextDouble() * 4;
+                ocultapeso[i][j] = 1;
         
         for (int i = 0; i < saidas; i++) 
             for (int j = 0; j < n.size(); j++) 
-                saidapeso[i][j] = (-2)+ r.nextDouble() * 4;
+                saidapeso[i][j] = 1;
     }
     
     public void corrigePesoO(double aprendizagem, List<Double> erro)
     {
         for (int i = 0; i < n.size(); i++)
             for (int j = 0; j < erro.size(); j++) 
-                ocultapeso[i][j] += (aprendizagem * n.get(i).getErro() 
+                ocultapeso[i][j] = ocultapeso[i][j] + (aprendizagem * n.get(i).getErro() 
                         * erro.get(j));
     }
     
@@ -84,7 +84,7 @@ public class Oculta
     {
         for (int i = 0; i < erro.size(); i++)
             for (int j = 0; j < n.size(); j++)
-                saidapeso[i][j] += (aprendizagem * erro.get(i) 
+                saidapeso[i][j] = saidapeso[i][j] + (aprendizagem * erro.get(i) 
                         * n.get(j).getFnet());
     }
 }

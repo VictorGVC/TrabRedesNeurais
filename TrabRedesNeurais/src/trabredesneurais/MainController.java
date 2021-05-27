@@ -452,7 +452,7 @@ public class MainController implements Initializable {
                 for (int j = 0; j < oculta; j++) 
                     loculta.add(t.get(i).getOculta().getNeuronio().get(j).getFnet());
                 
-                for (int j = 0; j < saida; j++) 
+                for (int j = 0; j < saida; j++)
                 {
                     t.get(i).getSaidas().get(j).calculaNet(j, loculta, t.get(i).getOculta().getSaidapeso());
                     
